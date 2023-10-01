@@ -75,18 +75,19 @@ public class CreateDatabase {
     }
 
     private void createVersionsInfo() throws SQLException {
-        final String sql = "CREATE TABLE IF NOT EXISTS versions_info (" +
-                           "version_info_id TEXT PRIMARY KEY, " +
-                           "version_info_environment_ref INTEGER NOT NULL, " +
-                           "version_info_module_ref INTEGER NOT NULL, " +
-                           "version_info_created_at TEXT, " +
-                           "version_info_updated_at TEXT, " +
-                           "FOREIGN KEY(version_info_environment_ref) REFERENCES environments(environment_id), " +
-                           "FOREIGN KEY(version_info_module_ref) REFERENCES modules(module_id)" +
+        final String sql = "CREATE TABLE IF NOT EXISTS versions (" +
+                           "version_id TEXT PRIMARY KEY, " +
+                           "version_name TEXT NOT NULL, " +
+                           "version_environment_ref TEXT NOT NULL, " +
+                           "version_module_ref TEXT NOT NULL, " +
+                           "version_created_at TEXT, " +
+                           "version_updated_at TEXT, " +
+                           "FOREIGN KEY(version_environment_ref) REFERENCES environments(environment_id), " +
+                           "FOREIGN KEY(version_module_ref) REFERENCES modules(module_id)" +
                            ");";
         executeSQL(sql);
 
-        final String createIndexSql = "CREATE INDEX IF NOT EXISTS idx_version_info_id ON versions_info (version_info_id);";
+        final String createIndexSql = "CREATE INDEX IF NOT EXISTS idx_version_id ON versions (version_id);";
         executeSQL(createIndexSql);
     }
 
@@ -97,7 +98,7 @@ public class CreateDatabase {
                            "file_version_map_location_ref TEXT NOT NULL, " +
                            "file_version_map_created_at TEXT, " +
                            "file_version_map_updated_at TEXT, " +
-                           "FOREIGN KEY(file_version_map_version_ref) REFERENCES versions_info(version_info_id), " +
+                           "FOREIGN KEY(file_version_map_version_ref) REFERENCES versions(version_id), " +
                            "FOREIGN KEY(file_version_map_location_ref) REFERENCES file_locations_map(file_location_id)" +
                            ");";
         executeSQL(sql);

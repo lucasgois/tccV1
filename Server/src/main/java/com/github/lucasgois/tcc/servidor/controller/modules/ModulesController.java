@@ -11,8 +11,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.github.lucasgois.tcc.servidor.controller.Locations.MODULES;
+
 @RestController
-@RequestMapping("modules")
+@RequestMapping(MODULES)
 public class ModulesController {
 
     private final ModulesRepository repository;
@@ -28,14 +30,14 @@ public class ModulesController {
 
     @GetMapping("{uuid}")
     public ResponseEntity<Map<String, Object>> id(@PathVariable final String uuid) throws SQLException {
-        Optional<Map<String, Object>> item = repository.id(uuid);
+        final Optional<Map<String, Object>> item = repository.id(uuid);
         return item.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> create(@RequestBody @Valid final ModuleDto body) throws SQLException {
-        String id = repository.create(body);
-        URI uri = URI.create("modules/" + id);
+        final String id = repository.create(body);
+        final URI uri = URI.create(MODULES + "/" + id);
         return ResponseEntity.created(uri).build();
     }
 

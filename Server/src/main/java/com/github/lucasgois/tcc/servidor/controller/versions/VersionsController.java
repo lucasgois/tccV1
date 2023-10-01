@@ -1,4 +1,4 @@
-package com.github.lucasgois.tcc.servidor.controller.environments;
+package com.github.lucasgois.tcc.servidor.controller.versions;
 
 import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
@@ -11,15 +11,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.github.lucasgois.tcc.servidor.controller.Locations.ENVIRONMENTS;
+import static com.github.lucasgois.tcc.servidor.controller.Locations.VERSIONS;
 
 @RestController
-@RequestMapping(ENVIRONMENTS)
-public class EnvironmentsController {
+@RequestMapping(VERSIONS)
+public class VersionsController {
 
-    private final EnvironmentsRepository repository;
+    private final VersionsRepository repository;
 
-    public EnvironmentsController(EnvironmentsRepository repository) {
+    public VersionsController(VersionsRepository repository) {
         this.repository = repository;
     }
 
@@ -35,14 +35,14 @@ public class EnvironmentsController {
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Object> create(@RequestBody @Valid final EnvironmentsDto body) throws SQLException {
+    public ResponseEntity<Object> create(@RequestBody @Valid final VersionDto body) throws SQLException {
         final String id = repository.create(body);
-        final URI uri = URI.create(ENVIRONMENTS + "/" + id);
+        final URI uri = URI.create(VERSIONS + "/" + id);
         return ResponseEntity.created(uri).build();
     }
 
     @PutMapping(value = "{uuid}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Object> alterar(@PathVariable final String uuid, @RequestBody @Valid final EnvironmentsDto body) throws SQLException {
+    public ResponseEntity<Object> alterar(@PathVariable final String uuid, @RequestBody @Valid final VersionDto body) throws SQLException {
         repository.update(uuid, body);
         return ResponseEntity.ok().build();
     }

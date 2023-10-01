@@ -1,4 +1,4 @@
-package com.github.lucasgois.tcc.servidor.controller.modules;
+package com.github.lucasgois.tcc.servidor.controller.environments;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,29 +16,29 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.github.lucasgois.tcc.servidor.controller.Locations.*;
+import static com.github.lucasgois.tcc.servidor.controller.Locations.ENVIRONMENTS;
 import static java.util.Objects.requireNonNull;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@DisplayName("Modules test")
+@DisplayName("Environments test")
 @SpringBootTest
 @AutoConfigureMockMvc
-class ModulesControllerTest {
+class EnvironmentsTest {
 
     @Autowired
     private ObjectMapper mapper;
     @Autowired
     private MockMvc mockMvc;
 
-    private Map<String, Object> module;
+    private Map<String, Object> environment;
 
     @Test
-    @DisplayName("Not found test")
+    @DisplayName("Not Found test")
     void notFoundTest() throws Exception {
-        final ResultActions result = mockMvc.perform(get("/" + MODULES + "/" + "91b037d1-f04d-4b9c-b8e5-f1f8ae4df1dd"));
+        final ResultActions result = mockMvc.perform(get("/" + ENVIRONMENTS + "/" + "91b037d1-f04d-4b9c-b8e5-f1f8ae4df1dd"));
 
         result.andExpect(status().isNotFound());
     }
@@ -46,7 +46,7 @@ class ModulesControllerTest {
     @Test
     @DisplayName("Unprocessable Entity test")
     void unprocessableEntityTest() throws Exception {
-        final ResultActions result = mockMvc.perform(post("/" + MODULES)
+        final ResultActions result = mockMvc.perform(post("/" + ENVIRONMENTS)
                                                              .contentType("application/json")
                                                              .content("{ \"invalid_field\": \"invalid_field_value\"}"));
 
@@ -56,12 +56,13 @@ class ModulesControllerTest {
     @Test
     @DisplayName("Bad Request Test")
     void badRequestTest() throws Exception {
-        final ResultActions result = mockMvc.perform(post("/" + MODULES)
+        final ResultActions result = mockMvc.perform(post("/" + ENVIRONMENTS)
                                                              .contentType("application/json")
                                                              .content(""));
 
         result.andExpect(status().isBadRequest());
     }
+
     @Test
     @DisplayName("All methods test")
     void test() throws Exception {
@@ -79,10 +80,10 @@ class ModulesControllerTest {
 
         final Map<?, ?> bodyAfterPut = doSelect(location);
 
-        assertEquals(bodyAfterPost.get("module_id"), bodyAfterPut.get("module_id"));
-        assertNotEquals(bodyAfterPost.get("module_name"), bodyAfterPut.get("module_name"));
-        assertEquals(bodyAfterPost.get("module_created_at"), bodyAfterPut.get("module_created_at"));
-        assertNotEquals(bodyAfterPost.get("module_updated_at"), bodyAfterPut.get("module_updated_at"));
+        assertEquals(bodyAfterPost.get("environment_id"), bodyAfterPut.get("environment_id"));
+        assertNotEquals(bodyAfterPost.get("environment_name"), bodyAfterPut.get("environment_name"));
+        assertEquals(bodyAfterPost.get("environment_created_at"), bodyAfterPut.get("environment_created_at"));
+        assertNotEquals(bodyAfterPost.get("environment_updated_at"), bodyAfterPut.get("environment_updated_at"));
 
         doDelete(location);
 
@@ -95,12 +96,12 @@ class ModulesControllerTest {
 
     @NotNull
     private String doPost() throws Exception {
-        module = new HashMap<>();
-        module.put("module_name", "Module Name");
+        environment = new HashMap<>();
+        environment.put("environment_name", "Environment Name");
 
-        final ResultActions result = mockMvc.perform(post("/" + MODULES)
+        final ResultActions result = mockMvc.perform(post("/" + ENVIRONMENTS)
                                                              .contentType("application/json")
-                                                             .content(mapper.writeValueAsBytes(module)));
+                                                             .content(mapper.writeValueAsBytes(environment)));
 
         final MvcResult mvcResult = result.andExpect(status().isCreated())
                 .andExpect(header().exists("Location"))
@@ -112,7 +113,7 @@ class ModulesControllerTest {
     }
 
     private int doSelectAll() throws Exception {
-        final ResultActions result = mockMvc.perform(get("/" + MODULES));
+        final ResultActions result = mockMvc.perform(get("/" + ENVIRONMENTS));
 
         final MvcResult mvcResult = result.andExpect(status().isOk())
                 .andReturn();
@@ -128,7 +129,7 @@ class ModulesControllerTest {
         final ResultActions result = mockMvc.perform(get("/" + location));
 
         final MvcResult mvcResult = result.andExpect(status().isOk())
-                .andExpect(jsonPath("$.module_name", is(module.get("module_name"))))
+                .andExpect(jsonPath("$.environment_name", is(environment.get("environment_name"))))
                 .andReturn();
 
         final String content = mvcResult.getResponse().getContentAsString();
@@ -138,12 +139,12 @@ class ModulesControllerTest {
 
 
     private void doPut(final String location) throws Exception {
-        module = new HashMap<>();
-        module.put("module_name", "Module Name Updated");
+        environment = new HashMap<>();
+        environment.put("environment_name", "Environment Name Updated");
 
         final ResultActions result = mockMvc.perform(put("/" + location)
                                                              .contentType("application/json")
-                                                             .content(mapper.writeValueAsBytes(module)));
+                                                             .content(mapper.writeValueAsBytes(environment)));
 
         result.andExpect(status().isOk());
     }

@@ -29,7 +29,7 @@ public class ModulesRepository extends SqliteConnection {
         final Connection connection = getConnection();
 
         try (final PreparedStatement statement = connection.prepareStatement(QUERY_ALL)) {
-            log.info("all: {}", statement);
+            log.info("{}", statement);
 
             try (final ResultSet resultSet = statement.executeQuery()) {
 
@@ -54,7 +54,7 @@ public class ModulesRepository extends SqliteConnection {
 
         try (final PreparedStatement statement = connection.prepareStatement(QUERY_ID)) {
             statement.setString(1, uuid);
-            log.info("id: {}", statement);
+            log.info("{}", statement);
 
             try (final ResultSet resultSet = statement.executeQuery()) {
 
@@ -87,7 +87,7 @@ public class ModulesRepository extends SqliteConnection {
             statement.setString(++i, dateTime);
             statement.setString(++i, dateTime);
 
-            log.info("create: {}", statement);
+            log.info("{}", statement);
             statement.executeUpdate();
         }
 
@@ -105,7 +105,7 @@ public class ModulesRepository extends SqliteConnection {
             statement.setString(++i, dateTime);
             statement.setString(++i, uuid);
 
-            log.info("update: {}", statement);
+            log.info("{}", statement);
             statement.executeUpdate();
         }
     }
@@ -117,7 +117,7 @@ public class ModulesRepository extends SqliteConnection {
             int i = 0;
             statement.setString(++i, uuid);
 
-            log.info("delete: {}", statement);
+            log.info("{}", statement);
             statement.executeUpdate();
         }
     }
