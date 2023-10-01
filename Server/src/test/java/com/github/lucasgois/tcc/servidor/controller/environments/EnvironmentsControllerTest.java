@@ -83,8 +83,8 @@ class EnvironmentsControllerTest {
 
         assertEquals(bodyAfterPost.get("environment_id"), bodyAfterPut.get("environment_id"));
         assertNotEquals(bodyAfterPost.get("environment_name"), bodyAfterPut.get("environment_name"));
-        assertEquals(bodyAfterPost.get("created_at"), bodyAfterPut.get("created_at"));
-        assertNotEquals(bodyAfterPost.get("updated_at"), bodyAfterPut.get("updated_at"));
+        assertEquals(bodyAfterPost.get("environment_created_at"), bodyAfterPut.get("environment_created_at"));
+        assertNotEquals(bodyAfterPost.get("environment_updated_at"), bodyAfterPut.get("environment_updated_at"));
 
         doDelete(location);
 

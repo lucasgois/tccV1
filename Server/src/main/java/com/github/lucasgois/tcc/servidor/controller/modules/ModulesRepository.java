@@ -16,10 +16,10 @@ import java.util.*;
 @Repository
 public class ModulesRepository extends ConexaoSqlite {
 
-    private static final String QUERY_ALL = "SELECT module_id, module_name, created_at, updated_at FROM modules ORDER BY created_at";
-    private static final String QUERY_ID = "SELECT module_id, module_name, created_at, updated_at FROM modules WHERE module_id = ?";
-    private static final String QUERY_INSERT = "INSERT INTO modules (module_id, module_name, created_at, updated_at) VALUES (?, ?, ?, ?)";
-    private static final String QUERY_UPDATE = "UPDATE modules SET module_name = ?, updated_at = ? WHERE module_id = ?";
+    private static final String QUERY_ALL = "SELECT module_id, module_name, module_created_at, module_updated_at FROM modules ORDER BY module_created_at";
+    private static final String QUERY_ID = "SELECT module_id, module_name, module_created_at, module_updated_at FROM modules WHERE module_id = ?";
+    private static final String QUERY_INSERT = "INSERT INTO modules (module_id, module_name, module_created_at, module_updated_at) VALUES (?, ?, ?, ?)";
+    private static final String QUERY_UPDATE = "UPDATE modules SET module_name = ?, module_updated_at = ? WHERE module_id = ?";
     private static final String QUERY_DELETE = "DELETE FROM modules WHERE module_id = ?";
 
 

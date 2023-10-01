@@ -16,10 +16,10 @@ import java.util.*;
 @Repository
 public class EnvironmentsRepository extends ConexaoSqlite {
 
-    private static final String QUERY_ALL = "SELECT environment_id, environment_name, created_at, updated_at FROM environments ORDER BY created_at";
-    private static final String QUERY_ID = "SELECT environment_id, environment_name, created_at, updated_at FROM environments WHERE environment_id = ?";
-    private static final String QUERY_INSERT = "INSERT INTO environments (environment_id, environment_name, created_at, updated_at) VALUES (?, ?, ?, ?)";
-    private static final String QUERY_UPDATE = "UPDATE environments SET environment_name = ?, updated_at = ? WHERE environment_id = ?";
+    private static final String QUERY_ALL = "SELECT environment_id, environment_name, environment_created_at, environment_updated_at FROM environments ORDER BY environment_created_at";
+    private static final String QUERY_ID = "SELECT environment_id, environment_name, environment_created_at, environment_updated_at FROM environments WHERE environment_id = ?";
+    private static final String QUERY_INSERT = "INSERT INTO environments (environment_id, environment_name, environment_created_at, environment_updated_at) VALUES (?, ?, ?, ?)";
+    private static final String QUERY_UPDATE = "UPDATE environments SET environment_name = ?, environment_updated_at = ? WHERE environment_id = ?";
     private static final String QUERY_DELETE = "DELETE FROM environments WHERE environment_id = ?";
 
 

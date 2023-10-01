@@ -81,8 +81,8 @@ class ModulesControllerTest {
 
         assertEquals(bodyAfterPost.get("module_id"), bodyAfterPut.get("module_id"));
         assertNotEquals(bodyAfterPost.get("module_name"), bodyAfterPut.get("module_name"));
-        assertEquals(bodyAfterPost.get("created_at"), bodyAfterPut.get("created_at"));
-        assertNotEquals(bodyAfterPost.get("updated_at"), bodyAfterPut.get("updated_at"));
+        assertEquals(bodyAfterPost.get("module_created_at"), bodyAfterPut.get("module_created_at"));
+        assertNotEquals(bodyAfterPost.get("module_updated_at"), bodyAfterPut.get("module_updated_at"));
 
         doDelete(location);
 

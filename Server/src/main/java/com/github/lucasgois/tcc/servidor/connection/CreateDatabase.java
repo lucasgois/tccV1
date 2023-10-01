@@ -15,17 +15,17 @@ public class CreateDatabase {
         createModulesTable();
         createEnvironmentsTable();
         createFileRegistries();
-        criarFileLocationMap();
-        criarVersionInfo();
-        criarVersionFileMapping();
+        createFileLocationMap();
+        createVersionsInfo();
+        createFilesVersionMap();
     }
 
     private void createModulesTable() throws SQLException {
         String sql = "CREATE TABLE IF NOT EXISTS modules (" +
                      "module_id TEXT PRIMARY KEY, " +
                      "module_name TEXT NOT NULL, " +
-                     "created_at TEXT, " +
-                     "updated_at TEXT" +
+                     "module_created_at TEXT, " +
+                     "module_updated_at TEXT" +
                      ");";
         executarSQL(sql);
     }
@@ -33,64 +33,64 @@ public class CreateDatabase {
     private void createEnvironmentsTable() throws SQLException {
         String sql = "CREATE TABLE IF NOT EXISTS environments (" +
                      "environment_id TEXT PRIMARY KEY, " +
-                     "environment_name TEXT NOT NULL," +
-                     "created_at TEXT, " +
-                     "updated_at TEXT" +
+                     "environment_name TEXT NOT NULL, " +
+                     "environment_created_at TEXT, " +
+                     "environment_updated_at TEXT" +
                      ");";
         executarSQL(sql);
     }
 
     private void createFileRegistries() throws SQLException {
         String sql = "CREATE TABLE IF NOT EXISTS file_registries (" +
-                     "file_hash TEXT PRIMARY KEY," +
-                     "file_name TEXT NOT NULL," +
-                     "created_at TEXT, " +
-                     "updated_at TEXT" +
+                     "file_registry_hash TEXT PRIMARY KEY, " +
+                     "file_registry_name TEXT NOT NULL, " +
+                     "file_registry_created_at TEXT, " +
+                     "file_registry_updated_at TEXT" +
                      ");";
         executarSQL(sql);
     }
 
-    private void criarFileLocationMap() throws SQLException {
-        String sql = "CREATE TABLE IF NOT EXISTS FileLocationMap (" +
-                     "LocationID INTEGER PRIMARY KEY AUTOINCREMENT," +
-                     "FileHash_Ref TEXT NOT NULL," +
-                     "FileLocationPath TEXT NOT NULL," +
-                     "CreationDate TEXT DEFAULT CURRENT_TIMESTAMP," +
-                     "LastModifiedDate TEXT DEFAULT CURRENT_TIMESTAMP," +
-                     "FOREIGN KEY(FileHash_Ref) REFERENCES FileRegistry(FileHash)" +
+    private void createFileLocationMap() throws SQLException {
+        String sql = "CREATE TABLE IF NOT EXISTS file_locations_map (" +
+                     "file_location_id TEXT PRIMARY KEY, " +
+                     "file_location_hash_ref TEXT NOT NULL, " +
+                     "file_location_path TEXT NOT NULL, " +
+                     "file_location_created_at TEXT, " +
+                     "file_location_updated_at TEXT, " +
+                     "FOREIGN KEY(file_location_hash_ref) REFERENCES file_registries(file_registry_hash)" +
                      ");";
         executarSQL(sql);
     }
 
-    private void criarVersionInfo() throws SQLException {
-        String sql = "CREATE TABLE IF NOT EXISTS VersionInfo (" +
-                     "VersionID INTEGER PRIMARY KEY AUTOINCREMENT," +
-                     "EnvironmentID_Ref INTEGER NOT NULL," +
-                     "ModuleID_Ref INTEGER NOT NULL," +
-                     "CreationDate TEXT DEFAULT CURRENT_TIMESTAMP," +
-                     "LastModifiedDate TEXT DEFAULT CURRENT_TIMESTAMP," +
-                     "FOREIGN KEY(EnvironmentID_Ref) REFERENCES DeploymentEnvironment(EnvironmentID)," +
-                     "FOREIGN KEY(ModuleID_Ref) REFERENCES ModuleInfo(ModuleID)" +
+    private void createVersionsInfo() throws SQLException {
+        String sql = "CREATE TABLE IF NOT EXISTS versions_info (" +
+                     "version_info_id TEXT PRIMARY KEY, " +
+                     "version_info_environment_ref INTEGER NOT NULL, " +
+                     "version_info_module_ref INTEGER NOT NULL, " +
+                     "version_info_created_at TEXT, " +
+                     "version_info_updated_at TEXT, " +
+                     "FOREIGN KEY(version_info_environment_ref) REFERENCES environments(environment_id)," +
+                     "FOREIGN KEY(version_info_module_ref) REFERENCES modules(module_id)" +
                      ");";
         executarSQL(sql);
     }
 
-    private void criarVersionFileMapping() throws SQLException {
-        String sql = "CREATE TABLE IF NOT EXISTS VersionFileMapping (" +
-                     "MappingID INTEGER PRIMARY KEY AUTOINCREMENT," +
-                     "VersionID_Ref INTEGER NOT NULL," +
-                     "LocationID_Ref INTEGER NOT NULL," +
-                     "CreationDate TEXT DEFAULT CURRENT_TIMESTAMP," +
-                     "LastModifiedDate TEXT DEFAULT CURRENT_TIMESTAMP," +
-                     "FOREIGN KEY(VersionID_Ref) REFERENCES VersionInfo(VersionID)," +
-                     "FOREIGN KEY(LocationID_Ref) REFERENCES FileLocationMap(LocationID)" +
+    private void createFilesVersionMap() throws SQLException {
+        String sql = "CREATE TABLE IF NOT EXISTS files_version_map (" +
+                     "file_version_map_id TEXT PRIMARY KEY, " +
+                     "file_version_map_version_ref TEXT NOT NULL, " +
+                     "file_version_map_location_ref TEXT NOT NULL, " +
+                     "file_version_map_created_at TEXT, " +
+                     "file_version_map_updated_at TEXT, " +
+                     "FOREIGN KEY(file_version_map_version_ref) REFERENCES versions_info(version_info_id)," +
+                     "FOREIGN KEY(file_version_map_location_ref) REFERENCES file_locations_map(file_location_id)" +
                      ");";
         executarSQL(sql);
     }
 
-    private void executarSQL(String sql) throws SQLException {
-        try (Statement stmt = conn.createStatement()) {
-            stmt.execute(sql);
+    private void executarSQL(final String sql) throws SQLException {
+        try (final Statement statement = conn.createStatement()) {
+            statement.execute(sql);
         }
     }
 }
