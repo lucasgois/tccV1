@@ -1,6 +1,6 @@
 package com.github.lucasgois.tcc.servidor.torevise;
 
-import com.github.lucasgois.tcc.servidor.connection.ConexaoSqlite;
+import com.github.lucasgois.tcc.servidor.connection.SqliteConnection;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Repository;
 
@@ -11,7 +11,7 @@ import java.sql.SQLException;
 import java.util.Optional;
 
 @Repository
-public class ArquivoRepository extends ConexaoSqlite {
+public class ArquivoRepository extends SqliteConnection {
 
     public void insert(@NotNull ArquivoEntity arquivo) throws SQLException {
 
@@ -21,7 +21,9 @@ public class ArquivoRepository extends ConexaoSqlite {
 
         final String sql = "INSERT INTO arquivos (hash, nome) VALUES (?, ?)";
 
-        try (final Connection connection = createConnection(); final PreparedStatement statement = connection.prepareStatement(sql)) {
+        final Connection connection = getConnection();
+
+        try (final PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, arquivo.getHash());
             statement.setString(2, arquivo.getNome());
 
@@ -32,7 +34,9 @@ public class ArquivoRepository extends ConexaoSqlite {
     public Optional<ArquivoEntity> selectHash(@NotNull String hash) throws SQLException {
         final String sql = "SELECT hash, nome FROM arquivos WHERE hash = ?";
 
-        try (final Connection connection = createConnection(); final PreparedStatement statement = connection.prepareStatement(sql)) {
+        final Connection connection = getConnection();
+
+        try (final PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, hash);
 
             try (final ResultSet resultSet = statement.executeQuery()) {

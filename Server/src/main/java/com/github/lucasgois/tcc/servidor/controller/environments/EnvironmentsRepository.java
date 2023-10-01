@@ -1,6 +1,6 @@
 package com.github.lucasgois.tcc.servidor.controller.environments;
 
-import com.github.lucasgois.tcc.servidor.connection.ConexaoSqlite;
+import com.github.lucasgois.tcc.servidor.connection.SqliteConnection;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Repository;
@@ -14,7 +14,7 @@ import java.util.*;
 
 @Slf4j
 @Repository
-public class EnvironmentsRepository extends ConexaoSqlite {
+public class EnvironmentsRepository extends SqliteConnection {
 
     private static final String QUERY_ALL = "SELECT environment_id, environment_name, environment_created_at, environment_updated_at FROM environments ORDER BY environment_created_at";
     private static final String QUERY_ID = "SELECT environment_id, environment_name, environment_created_at, environment_updated_at FROM environments WHERE environment_id = ?";
@@ -26,22 +26,21 @@ public class EnvironmentsRepository extends ConexaoSqlite {
     public List<Map<String, Object>> all() throws SQLException {
         final List<Map<String, Object>> lista = new ArrayList<>();
 
-        try (final Connection connection = createConnection()) {
+        final Connection connection = getConnection();
 
-            try (final PreparedStatement statement = connection.prepareStatement(QUERY_ALL)) {
-                log.info("all: {}", statement);
+        try (final PreparedStatement statement = connection.prepareStatement(QUERY_ALL)) {
+            log.info("all: {}", statement);
 
-                try (final ResultSet resultSet = statement.executeQuery()) {
+            try (final ResultSet resultSet = statement.executeQuery()) {
 
-                    while (resultSet.next()) {
-                        final Map<String, Object> item = new LinkedHashMap<>();
+                while (resultSet.next()) {
+                    final Map<String, Object> item = new LinkedHashMap<>();
 
-                        for (int i = 1; i <= resultSet.getMetaData().getColumnCount(); i++) {
-                            item.put(resultSet.getMetaData().getColumnName(i), resultSet.getObject(i));
-                        }
-
-                        lista.add(item);
+                    for (int i = 1; i <= resultSet.getMetaData().getColumnCount(); i++) {
+                        item.put(resultSet.getMetaData().getColumnName(i), resultSet.getObject(i));
                     }
+
+                    lista.add(item);
                 }
             }
         }
@@ -51,23 +50,22 @@ public class EnvironmentsRepository extends ConexaoSqlite {
 
     public Optional<Map<String, Object>> id(final String uuid) throws SQLException {
 
-        try (final Connection connection = createConnection()) {
+        final Connection connection = getConnection();
 
-            try (final PreparedStatement statement = connection.prepareStatement(QUERY_ID)) {
-                statement.setString(1, uuid);
-                log.info("id: {}", statement);
+        try (final PreparedStatement statement = connection.prepareStatement(QUERY_ID)) {
+            statement.setString(1, uuid);
+            log.info("id: {}", statement);
 
-                try (final ResultSet resultSet = statement.executeQuery()) {
+            try (final ResultSet resultSet = statement.executeQuery()) {
 
-                    if (resultSet.next()) {
-                        final Map<String, Object> item = new LinkedHashMap<>();
+                if (resultSet.next()) {
+                    final Map<String, Object> item = new LinkedHashMap<>();
 
-                        for (int i = 1; i <= resultSet.getMetaData().getColumnCount(); i++) {
-                            item.put(resultSet.getMetaData().getColumnName(i), resultSet.getObject(i));
-                        }
-
-                        return Optional.of(item);
+                    for (int i = 1; i <= resultSet.getMetaData().getColumnCount(); i++) {
+                        item.put(resultSet.getMetaData().getColumnName(i), resultSet.getObject(i));
                     }
+
+                    return Optional.of(item);
                 }
             }
         }
@@ -80,18 +78,17 @@ public class EnvironmentsRepository extends ConexaoSqlite {
         final String uuid = UUID.randomUUID().toString();
         final String dateTime = LocalDateTime.now().toString();
 
-        try (final Connection connection = createConnection()) {
+        final Connection connection = getConnection();
 
-            try (final PreparedStatement statement = connection.prepareStatement(QUERY_INSERT)) {
-                int i = 0;
-                statement.setString(++i, uuid);
-                statement.setString(++i, body.getEnvironment_name());
-                statement.setString(++i, dateTime);
-                statement.setString(++i, dateTime);
+        try (final PreparedStatement statement = connection.prepareStatement(QUERY_INSERT)) {
+            int i = 0;
+            statement.setString(++i, uuid);
+            statement.setString(++i, body.getEnvironment_name());
+            statement.setString(++i, dateTime);
+            statement.setString(++i, dateTime);
 
-                log.info("create: {}", statement);
-                statement.executeUpdate();
-            }
+            log.info("create: {}", statement);
+            statement.executeUpdate();
         }
 
         return uuid;
@@ -100,31 +97,28 @@ public class EnvironmentsRepository extends ConexaoSqlite {
     public void update(final String uuid, @NotNull final EnvironmentsDto body) throws SQLException {
         final String dateTime = LocalDateTime.now().toString();
 
-        try (final Connection connection = createConnection()) {
+        final Connection connection = getConnection();
 
-            try (final PreparedStatement statement = connection.prepareStatement(QUERY_UPDATE)) {
-                int i = 0;
-                statement.setString(++i, body.getEnvironment_name());
-                statement.setString(++i, dateTime);
-                statement.setString(++i, uuid);
+        try (final PreparedStatement statement = connection.prepareStatement(QUERY_UPDATE)) {
+            int i = 0;
+            statement.setString(++i, body.getEnvironment_name());
+            statement.setString(++i, dateTime);
+            statement.setString(++i, uuid);
 
-                log.info("update: {}", statement);
-                statement.executeUpdate();
-            }
+            log.info("update: {}", statement);
+            statement.executeUpdate();
         }
     }
 
     public void delete(final String uuid) throws SQLException {
+        final Connection connection = getConnection();
 
-        try (final Connection connection = createConnection()) {
+        try (final PreparedStatement statement = connection.prepareStatement(QUERY_DELETE)) {
+            int i = 0;
+            statement.setString(++i, uuid);
 
-            try (final PreparedStatement statement = connection.prepareStatement(QUERY_DELETE)) {
-                int i = 0;
-                statement.setString(++i, uuid);
-
-                log.info("delete: {}", statement);
-                statement.executeUpdate();
-            }
+            log.info("delete: {}", statement);
+            statement.executeUpdate();
         }
     }
 }
