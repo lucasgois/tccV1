@@ -1,24 +1,20 @@
 package com.github.lucasgois.tcc.deploy.controllers;
 
-import com.github.lucasgois.tcc.common.ModeloDto;
 import com.github.lucasgois.tcc.common.Util;
 import com.github.lucasgois.tcc.deploy.exceptions.DeployException;
 import com.github.lucasgois.tcc.deploy.models.Environment;
-import com.github.lucasgois.tcc.deploy.models.Modelo;
 import com.github.lucasgois.tcc.deploy.models.Module;
 import com.github.lucasgois.tcc.deploy.models.Version;
+import com.github.lucasgois.tcc.deploy.server.DeployFile;
 import com.github.lucasgois.tcc.deploy.utils.ComboboxUtil;
-import com.github.lucasgois.tcc.deploy.utils.InformationLoader;
+import com.github.lucasgois.tcc.deploy.utils.ServerCommunication;
+import com.github.lucasgois.tcc.deploy.utils.tableview.FileHash;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -26,7 +22,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -45,20 +40,20 @@ public class DeployController extends Controller {
     @FXML
     private ComboBox<Environment> cbEnvironments;
     @FXML
-    private TableView<Modelo> tbArquivos;
+    private TableView<FileHash> tbArquivos;
     @FXML
-    private TableColumn<Modelo, String> treeTableColumn1;
+    private TableColumn<FileHash, String> treeTableColumn1;
     @FXML
-    private TableColumn<Modelo, String> treeTableColumn2;
+    private TableColumn<FileHash, String> treeTableColumn2;
 
-    private final RestTemplate restTemplate = new RestTemplate();
     private Path path;
     private boolean comboBoxFlag = false;
+    private final ServerCommunication server = new ServerCommunication();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        treeTableColumn1.setCellValueFactory(param -> param.getValue().getKey());
-        treeTableColumn2.setCellValueFactory(param -> param.getValue().getValue());
+        treeTableColumn1.setCellValueFactory(param -> param.getValue().getHash());
+        treeTableColumn2.setCellValueFactory(param -> param.getValue().getPath());
 
         try {
             path = Path.of(getClass().getProtectionDomain().getCodeSource().getLocation().toURI()).getParent().resolve("main");
@@ -112,8 +107,6 @@ public class DeployController extends Controller {
     }
 
     private void loadCombobox() {
-        final InformationLoader loader = new InformationLoader();
-
         cbVersions.getItems().clear();
         cbModules.getItems().clear();
         cbEnvironments.getItems().clear();
@@ -121,9 +114,9 @@ public class DeployController extends Controller {
         cbVersions.getItems().add(newVersion);
         cbVersions.setValue(newVersion);
 
-        cbVersions.getItems().addAll(loader.getVersions());
-        cbModules.getItems().addAll(loader.getModules());
-        cbEnvironments.getItems().addAll(loader.getEnvironment());
+        cbVersions.getItems().addAll(server.getVersions());
+        cbModules.getItems().addAll(server.getModules());
+        cbEnvironments.getItems().addAll(server.getEnvironment());
     }
 
     @FXML
@@ -138,12 +131,10 @@ public class DeployController extends Controller {
 
     @FXML
     private void onLoad() {
-        log.info("onLoad");
-
         try {
             load();
         } catch (Exception ex) {
-            log.error("onLoad", ex);
+            error(ex);
         }
     }
 
@@ -152,8 +143,7 @@ public class DeployController extends Controller {
         log.info("onDeploy");
 
         try {
-            post();
-            get();
+            server.deploy(path, tbArquivos.getItems());
         } catch (Exception ex) {
             error(ex);
         }
@@ -170,37 +160,14 @@ public class DeployController extends Controller {
     }
 
     private void load() throws IOException, NoSuchAlgorithmException {
+        DeployFile.init(path);
+
         tbArquivos.getItems().clear();
 
         final List<Pair<String, String>> lista = Util.listFilesWithHashes(path);
 
         for (final Pair<String, String> item : lista) {
-            tbArquivos.getItems().add(new Modelo(item));
+            tbArquivos.getItems().add(new FileHash(item));
         }
-    }
-
-
-    private void post() {
-        List<ModeloDto> list = new ArrayList<>();
-
-        for (Modelo item : tbArquivos.getItems()) {
-            list.add(new ModeloDto(item.getKey().get(), item.getValue().get()));
-        }
-
-        String apiUrl = "http://localhost:8080/version";
-
-        HttpEntity<List<ModeloDto>> requestEntity = new HttpEntity<>(list);
-
-        ResponseEntity<String> postResponse = restTemplate.exchange(apiUrl, HttpMethod.POST, requestEntity, String.class);
-
-        log.info("POST Response: {}", postResponse.getBody());
-    }
-
-    private void get() {
-        String apiUrl = "http://localhost:8080/version";
-
-        ResponseEntity<String> getResponse = restTemplate.getForEntity(apiUrl, String.class);
-
-        log.info("GET Response: {}", getResponse.getBody());
     }
 }

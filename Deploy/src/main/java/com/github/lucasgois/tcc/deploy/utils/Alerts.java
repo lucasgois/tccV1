@@ -24,8 +24,15 @@ public class Alerts {
 
         final Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Error");
-        alert.setHeaderText(throwable.getCause().getMessage());
-        alert.setContentText(throwable.getCause().toString());
+
+        if (throwable.getCause() == null) {
+            alert.setHeaderText(throwable.getMessage());
+            alert.setContentText(throwable.toString());
+        } else {
+            alert.setHeaderText(throwable.getCause().getMessage());
+            alert.setContentText(throwable.getCause().toString());
+        }
+
         alert.showAndWait();
     }
 }

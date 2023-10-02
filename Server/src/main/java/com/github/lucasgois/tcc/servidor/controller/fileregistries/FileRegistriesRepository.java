@@ -1,6 +1,5 @@
-package com.github.lucasgois.tcc.servidor.controller.files;
+package com.github.lucasgois.tcc.servidor.controller.fileregistries;
 
-import com.github.lucasgois.tcc.common.Util;
 import com.github.lucasgois.tcc.servidor.connection.SqliteConnection;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -15,7 +14,7 @@ import java.util.*;
 
 @Slf4j
 @Repository
-public class FilesRepository extends SqliteConnection {
+public class FileRegistriesRepository extends SqliteConnection {
 
     private static final String QUERY_ALL = "SELECT file_registry_hash, file_registry_name, file_registry_created_at, file_registry_updated_at FROM file_registries ORDER BY file_registry_created_at";
     private static final String QUERY_ID = "SELECT file_registry_hash, file_registry_name, file_registry_created_at, file_registry_updated_at FROM file_registries WHERE file_registry_hash = ?";
@@ -74,16 +73,15 @@ public class FilesRepository extends SqliteConnection {
         return Optional.empty();
     }
 
-
-    public void create(@NotNull final FilesDto body) throws SQLException {
+    public void create(@NotNull final String fileHash) throws SQLException {
         final String dateTime = LocalDateTime.now().toString();
 
         final Connection connection = getConnection();
 
         try (final PreparedStatement statement = connection.prepareStatement(QUERY_INSERT)) {
             int i = 0;
-            statement.setString(++i, body.getFile_hash());
-            statement.setString(++i, body.getFile_name());
+            statement.setString(++i, fileHash);
+            statement.setString(++i, "");
             statement.setString(++i, dateTime);
             statement.setString(++i, dateTime);
 
@@ -92,7 +90,7 @@ public class FilesRepository extends SqliteConnection {
         }
     }
 
-    public void update(final String uuid, @NotNull final FilesDto body) throws SQLException {
+    public void update(final String uuid, @NotNull final FileRegistriesDto body) throws SQLException {
         final String dateTime = LocalDateTime.now().toString();
 
         final Connection connection = getConnection();

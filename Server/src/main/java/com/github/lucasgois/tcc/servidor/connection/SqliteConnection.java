@@ -1,5 +1,6 @@
 package com.github.lucasgois.tcc.servidor.connection;
 
+import com.github.lucasgois.tcc.servidor.utils.ServerUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -41,7 +42,9 @@ public class SqliteConnection {
     }
 
     private void connect() throws SQLException {
-        final String url = datasourceUrl + System.getProperty("user.home") + '\\' + datasourceDatabase;
+        ServerUtils.createAppFile();
+
+        final String url = datasourceUrl + ServerUtils.getMainPath() + '\\' + datasourceDatabase;
         log.info("url={}", url);
 
         setConnection(DriverManager.getConnection(url));
