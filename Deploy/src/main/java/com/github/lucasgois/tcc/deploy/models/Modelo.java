@@ -1,4 +1,4 @@
-package com.github.lucasgois.tcc.deploy;
+package com.github.lucasgois.tcc.deploy.models;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.util.Pair;

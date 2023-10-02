@@ -1,13 +1,18 @@
-package com.github.lucasgois.tcc.deploy;
+package com.github.lucasgois.tcc.deploy.controllers;
 
 import com.github.lucasgois.tcc.common.ModeloDto;
 import com.github.lucasgois.tcc.common.Util;
+import com.github.lucasgois.tcc.deploy.exceptions.DeployException;
+import com.github.lucasgois.tcc.deploy.models.Environment;
+import com.github.lucasgois.tcc.deploy.models.Modelo;
+import com.github.lucasgois.tcc.deploy.models.Module;
+import com.github.lucasgois.tcc.deploy.models.Version;
+import com.github.lucasgois.tcc.deploy.utils.ComboboxUtil;
+import com.github.lucasgois.tcc.deploy.utils.InformationLoader;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
@@ -21,21 +26,24 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import static com.github.lucasgois.tcc.deploy.utils.Alerts.error;
+
+
 @Slf4j
-public class MainController implements Initializable, Alerts {
+public class DeployController extends Controller {
+
+    private final Version newVersion = new Version("--------", "Criar nova versão", null, null);
 
     @FXML
-    private TextField tfVersion;
+    private ComboBox<Version> cbVersions;
     @FXML
-    private ComboBox<String> cbModule;
+    private ComboBox<Module> cbModules;
     @FXML
-    private ComboBox<String> cbEnvironment;
+    private ComboBox<Environment> cbEnvironments;
     @FXML
     private TableView<Modelo> tbArquivos;
     @FXML
@@ -45,39 +53,85 @@ public class MainController implements Initializable, Alerts {
 
     private final RestTemplate restTemplate = new RestTemplate();
     private Path path;
+    private boolean comboBoxFlag = false;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        tfVersion.setDisable(true);
-        tfVersion.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("yyMM")) + ".#");
-
-        cbModule.getItems().add("Devok Gestão");
-        cbModule.getItems().add("Devok NFC-e");
-        cbModule.getItems().add("Devok NF-e");
-        cbModule.getItems().add("Devok MEI");
-
-        cbEnvironment.getItems().add("Homologação");
-        cbEnvironment.getItems().add("Produção");
-
         treeTableColumn1.setCellValueFactory(param -> param.getValue().getKey());
         treeTableColumn2.setCellValueFactory(param -> param.getValue().getValue());
 
         try {
             path = Path.of(getClass().getProtectionDomain().getCodeSource().getLocation().toURI()).getParent().resolve("main");
         } catch (URISyntaxException ex) {
-            log.error("initialize", ex);
+            throw new DeployException(ex);
         }
+
+        ComboboxUtil.set(cbVersions);
+        ComboboxUtil.set(cbModules);
+        ComboboxUtil.set(cbEnvironments);
+
+        loadCombobox();
+    }
+
+    @FXML
+    private void onCbVersions() {
+        if (comboBoxFlag) return;
+        else comboBoxFlag = true;
+
+        Version version = cbVersions.getValue();
+
+        if (version != newVersion) {
+            final Module module = cbModules.getItems().stream().filter(item -> version.getModule_id().equals(item.getModule_id())).findFirst().orElse(null);
+            cbModules.setValue(module);
+
+            final Environment environment = cbEnvironments.getItems().stream().filter(item -> version.getEnvironment_id().equals(item.getEnvironment_id())).findFirst().orElse(null);
+            cbEnvironments.setValue(environment);
+        }
+
+        comboBoxFlag = false;
+    }
+
+    @FXML
+    private void onCbEnvironments() {
+        if (comboBoxFlag) return;
+        else comboBoxFlag = true;
+
+        cbVersions.setValue(newVersion);
+
+        comboBoxFlag = false;
+    }
+
+    @FXML
+    private void onCbModules() {
+        if (comboBoxFlag) return;
+        else comboBoxFlag = true;
+
+        cbVersions.setValue(newVersion);
+
+        comboBoxFlag = false;
+    }
+
+    private void loadCombobox() {
+        final InformationLoader loader = new InformationLoader();
+
+        cbVersions.getItems().clear();
+        cbModules.getItems().clear();
+        cbEnvironments.getItems().clear();
+
+        cbVersions.getItems().add(newVersion);
+        cbVersions.setValue(newVersion);
+
+        cbVersions.getItems().addAll(loader.getVersions());
+        cbModules.getItems().addAll(loader.getModules());
+        cbEnvironments.getItems().addAll(loader.getEnvironment());
     }
 
     @FXML
     protected void onExplorer() {
-        log.info("onExplorer");
-
         try {
             explorer();
-
         } catch (Exception ex) {
-            log.error("onExplorer", ex);
+            error(ex);
         }
     }
 
@@ -137,12 +191,7 @@ public class MainController implements Initializable, Alerts {
 
         HttpEntity<List<ModeloDto>> requestEntity = new HttpEntity<>(list);
 
-        ResponseEntity<String> postResponse = restTemplate.exchange(
-                apiUrl,
-                HttpMethod.POST,
-                requestEntity,
-                String.class
-        );
+        ResponseEntity<String> postResponse = restTemplate.exchange(apiUrl, HttpMethod.POST, requestEntity, String.class);
 
         log.info("POST Response: {}", postResponse.getBody());
     }
@@ -150,10 +199,7 @@ public class MainController implements Initializable, Alerts {
     private void get() {
         String apiUrl = "http://localhost:8080/version";
 
-        ResponseEntity<String> getResponse = restTemplate.getForEntity(
-                apiUrl,
-                String.class
-        );
+        ResponseEntity<String> getResponse = restTemplate.getForEntity(apiUrl, String.class);
 
         log.info("GET Response: {}", getResponse.getBody());
     }

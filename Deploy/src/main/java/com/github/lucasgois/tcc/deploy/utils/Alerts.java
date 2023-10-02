@@ -1,15 +1,17 @@
-package com.github.lucasgois.tcc.deploy;
+package com.github.lucasgois.tcc.deploy.utils;
 
 import javafx.scene.control.Alert;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
-public interface Alerts {
+@Slf4j
+public class Alerts {
 
+    private Alerts() {
+    }
 
-    default void showAlert(String title, String headerText, String contentText) {
+    public static void showAlert(String title, String headerText, String contentText) {
         final Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(title);
         alert.setHeaderText(headerText);
@@ -17,14 +19,13 @@ public interface Alerts {
         alert.showAndWait();
     }
 
-    default void error(final @NotNull Throwable throwable) {
-        final Logger log = LoggerFactory.getLogger(Alerts.class);
+    public static void error(@NotNull final Throwable throwable) {
         log.error("error", throwable);
 
         final Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Error");
-        alert.setHeaderText(throwable.getMessage());
-        alert.setContentText(throwable.toString());
+        alert.setHeaderText(throwable.getCause().getMessage());
+        alert.setContentText(throwable.getCause().toString());
         alert.showAndWait();
     }
 }
